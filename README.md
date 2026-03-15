@@ -31,4 +31,4 @@ export FLASK_APP=app_flask.py
 flask run --host=127.0.0.1 --port=5000
 ```
 
-La app permite editar la tabla de pagos, ajustar probabilidades y ver métricas junto con el árbol de decisión y gráficos interactivos. Los resultados pueden exportarse como CSV o PDF desde la interfaz.
+La app permite editar la tabla de pagos, ajustar probabilidades y ver métricas junto con el árbol de decisión y gráficos interactivos.
