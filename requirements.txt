@@ -1,0 +1,6 @@
+flask
+numpy
+pandas
+plotly
+matplotlib
+bootstrap-flask

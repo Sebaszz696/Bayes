@@ -1,0 +1,21 @@
+body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+#treeArea pre { background: #f8f9fa; padding: 10px; }
+#chartArea { height: 420px; }
+#tablesArea table { background: #ffffff; }
+.form-range { width: 100%; }
+.card-title { font-weight: 700; }
+
+/* Highlight classes for decision tables */
+.best-optimist, .best-optimist td { background-color: #ffd54f !important; color: #000 !important; font-weight: 700; }
+.best-conserv, .best-conserv td { background-color: #ff8a80 !important; color: #000 !important; font-weight: 700; }
+.best-ev, .best-ev td { background-color: #7feaf4 !important; color: #000 !important; font-weight: 700; }
+.best-ev { border-left: 3px solid #00c9a7; }
+
+/* Summary styles */
+.summary-grid { font-family: monospace; font-size: 14px; color: #d1d5db; }
+.summary-grid .label { color: #94a3b8; }
+.summary-grid .value { text-align: right; font-weight: 700; }
+.summary-grid .row { padding: 6px 0; }
+/* Regret (minimax) highlight */
+.best-regret, .best-regret td { background-color: #ffe0b2 !important; color: #000 !important; font-weight: 700; }
+
