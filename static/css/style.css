@@ -19,3 +19,7 @@ body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvet
 /* Regret (minimax) highlight */
 .best-regret, .best-regret td { background-color: #ffe0b2 !important; color: #000 !important; font-weight: 700; }
 
+/* Game theory: eliminated strategies */
+.gt-eliminated { text-decoration: line-through; color: #9ca3af !important; font-style: italic; }
+#gameTable input.form-control-sm { min-width: 60px; }
+

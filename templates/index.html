@@ -20,11 +20,40 @@
       <div class="row">
         <div class="col-lg-3">
           <div class="list-group" id="sidebarMenu" role="tablist">
-            <a class="list-group-item list-group-item-action active" id="nav-vars" data-bs-toggle="list" href="#tab-vars-pane" role="tab" aria-controls="tab-vars-pane">1) Variables</a>
-            <a class="list-group-item list-group-item-action" id="nav-tables" data-bs-toggle="list" href="#tab-tables-pane" role="tab" aria-controls="tab-tables-pane">2) Tablas</a>
-            <a class="list-group-item list-group-item-action" id="nav-tree" data-bs-toggle="list" href="#tab-tree-pane" role="tab" aria-controls="tab-tree-pane">3) Árbol de Bayes</a>
-            <a class="list-group-item list-group-item-action" id="nav-charts" data-bs-toggle="list" href="#tab-charts-pane" role="tab" aria-controls="tab-charts-pane">4) Gráficas</a>
-            <a class="list-group-item list-group-item-action" id="nav-summary" data-bs-toggle="list" href="#tab-summary-pane" role="tab" aria-controls="tab-summary-pane">5) Resumen</a>
+
+            <!-- Sección: Teoría de Bayes (desplegable) -->
+            <button class="list-group-item list-group-item-dark py-2 px-3 d-flex justify-content-between align-items-center border-0 w-100 text-start"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapseBayes" aria-expanded="true"
+                    style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;">
+              Teoría de Bayes <span class="ms-1">▾</span>
+            </button>
+            <div class="collapse show" id="collapseBayes">
+              <a class="list-group-item list-group-item-action active ps-4" id="nav-vars" data-bs-toggle="list" href="#tab-vars-pane" role="tab" aria-controls="tab-vars-pane">Variables</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-tables" data-bs-toggle="list" href="#tab-tables-pane" role="tab" aria-controls="tab-tables-pane">Tablas</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-tree" data-bs-toggle="list" href="#tab-tree-pane" role="tab" aria-controls="tab-tree-pane">Árbol de Bayes</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-charts" data-bs-toggle="list" href="#tab-charts-pane" role="tab" aria-controls="tab-charts-pane">Gráficas</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-summary" data-bs-toggle="list" href="#tab-summary-pane" role="tab" aria-controls="tab-summary-pane">Resumen</a>
+            </div>
+
+            <!-- Módulo: Teoría de Juegos (desplegable) -->
+            <button class="list-group-item list-group-item-dark py-2 px-3 mt-1 d-flex justify-content-between align-items-center border-0 w-100 text-start"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapseGame" aria-expanded="true"
+                    style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;">
+              Teoría de Juegos <span class="ms-1">▾</span>
+            </button>
+            <div class="collapse show" id="collapseGame">
+              <a class="list-group-item list-group-item-action ps-4" id="nav-game" data-bs-toggle="list" href="#tab-game-pane" role="tab" aria-controls="tab-game-pane">Ver análisis</a>
+            </div>
+
+            <!-- Módulo: Líneas de Espera (desplegable) -->
+            <button class="list-group-item list-group-item-dark py-2 px-3 mt-1 d-flex justify-content-between align-items-center border-0 w-100 text-start"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapseQueueing" aria-expanded="false"
+                    style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;">
+              Líneas de Espera <span class="ms-1">▾</span>
+            </button>
+            <div class="collapse" id="collapseQueueing">
+              <a class="list-group-item list-group-item-action ps-4" id="nav-queueing" data-bs-toggle="list" href="#tab-queueing-pane" role="tab" aria-controls="tab-queueing-pane">Ver análisis</a>
+            </div>
           </div>
         </div>
 
@@ -91,6 +120,57 @@ Procesos</textarea>
             </div>
             <div class="tab-pane fade" id="tab-summary-pane" role="tabpanel">
               <div id="summaryArea" class="p-3 bg-white rounded shadow-sm"></div>
+            </div>
+
+            <!-- TAB 6: Líneas de Espera -->
+            <div class="tab-pane fade" id="tab-queueing-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h5 class="card-title">Líneas de Espera — Comparación de Escenarios</h5>
+                  <p class="text-muted small mb-3">
+                    Este módulo evalúa el rendimiento del sistema de despacho de vehículos mediante teoría de colas.
+                    Se comparan tres escenarios operativos — Canal Simple (M/M/1), Canal Mejorado (M/M/1) y Canal Múltiple (M/M/2) —
+                    para determinar la configuración que minimiza tiempos de espera y longitud de cola,
+                    como insumo clave para la toma de decisiones del PETI 2025-2028.
+                  </p>
+                  <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                      <label class="form-label">λ (veh/hora)</label>
+                      <input type="number" class="form-control" id="q_lam" value="10" step="0.1" min="0.1">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">μ — Canal Simple (veh/hora)</label>
+                      <input type="number" class="form-control" id="q_mu_actual" value="12" step="0.1" min="0.1">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">μ — Canal Mejorado (veh/hora)</label>
+                      <input type="number" class="form-control" id="q_mu_mejor" value="18" step="0.1" min="0.1">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">μ — Canal Múltiple, por servidor</label>
+                      <input type="number" class="form-control" id="q_mu_mm2" value="12" step="0.1" min="0.1">
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-primary" id="queueingComputeBtn">Calcular</button>
+                  <div id="queueingResultsArea" class="mt-3"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 7: Teoría de Juegos -->
+            <div class="tab-pane fade" id="tab-game-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h5 class="card-title">Teoría de Juegos — JW vs. Sindicato (Suma Cero)</h5>
+                  <div class="d-flex gap-2 mb-3 flex-wrap">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="gameAddRowBtn">+ Estrategia JW</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="gameAddColBtn">+ Estrategia Sindicato</button>
+                    <button type="button" class="btn btn-primary ms-auto" id="gameComputeBtn">Calcular</button>
+                  </div>
+                  <div id="gameMatrixContainer" class="table-responsive mb-3"></div>
+                  <div id="gameResultsArea"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

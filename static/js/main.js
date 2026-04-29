@@ -484,7 +484,9 @@ function attachSectionDownloadButtons(){
     {id:'tab-tables-pane', title:'Tablas'},
     {id:'tab-tree-pane', title:'Arbol'},
     {id:'tab-charts-pane', title:'Graficas'},
-    {id:'tab-summary-pane', title:'Resumen'}
+    {id:'tab-summary-pane', title:'Resumen'},
+    {id:'tab-queueing-pane', title:'Lineas_Espera'},
+    {id:'tab-game-pane', title:'Teoria_Juegos'}
   ];
   panes.forEach((p, idx)=>{
     const pane = document.getElementById(p.id);
@@ -513,3 +515,385 @@ function attachSectionDownloadButtons(){
 
 // call it once now (panes are present in DOM)
 attachSectionDownloadButtons();
+
+// ============================================================
+// MODULE 6: LÍNEAS DE ESPERA (Queueing Theory)
+// ============================================================
+
+let lastQueueingData = null;
+
+async function computeQueueing() {
+  const payload = {
+    lam:           parseFloat(document.getElementById('q_lam').value)       || 10,
+    mu_mm1_actual: parseFloat(document.getElementById('q_mu_actual').value) || 12,
+    mu_mm1_mejor:  parseFloat(document.getElementById('q_mu_mejor').value)  || 18,
+    mu_mm2:        parseFloat(document.getElementById('q_mu_mm2').value)    || 12,
+  };
+  const res  = await fetch('/compute_queueing', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const data = await res.json();
+  lastQueueingData = data;
+  renderQueueingResults(data);
+}
+
+function renderQueueingResults(data) {
+  const area = document.getElementById('queueingResultsArea');
+  if (!area) return;
+
+  const metrics = [
+    { key:'rho', label:'ρ (Utilización)',           fmt: v => v.toFixed(3) },
+    { key:'P0',  label:'P₀ (Prob. sistema vacío)',  fmt: v => v.toFixed(3) },
+    { key:'L',   label:'L (Clientes en sistema)',    fmt: v => v.toFixed(4) },
+    { key:'Lq',  label:'Lq (Clientes en cola)',      fmt: v => v.toFixed(4) },
+    { key:'W',   label:'W (Tiempo en sistema, h)',   fmt: v => v.toFixed(4) },
+    { key:'Wq',  label:'Wq (Tiempo en cola, h)',     fmt: v => v.toFixed(4) },
+  ];
+  const best = data.best || {};
+
+  let html = '<table class="table table-bordered table-sm">';
+  html += '<thead class="table-dark"><tr><th>Indicador</th>';
+  data.scenarios.forEach(s => { html += `<th>${escapeHtml(s.label)}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  metrics.forEach(m => {
+    html += `<tr><td><strong>${m.label}</strong></td>`;
+    data.scenarios.forEach((s, idx) => {
+      if (!s.valid || s[m.key] === null) {
+        html += '<td class="text-danger fw-bold">Inestable</td>';
+      } else {
+        const isBest = best[m.key] === idx;
+        const cls    = isBest ? ' class="best-ev"' : '';
+        html += `<td${cls}>${m.fmt(s[m.key])}${isBest ? ' ★' : ''}</td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+
+  data.scenarios.forEach(s => {
+    if (!s.valid) {
+      html += `<div class="alert alert-danger py-1 mb-1"><strong>${escapeHtml(s.label)}:</strong> ${escapeHtml(s.error)}</div>`;
+    }
+  });
+
+  if (data.conclusion) {
+    html += `<div class="alert alert-info mt-2"><strong>Conclusión:</strong> ${escapeHtml(data.conclusion)}</div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+document.getElementById('queueingComputeBtn').addEventListener('click', computeQueueing);
+document.getElementById('nav-queueing').addEventListener('shown.bs.tab', () => {
+  if (!lastQueueingData) computeQueueing();
+  else renderQueueingResults(lastQueueingData);
+});
+
+// ============================================================
+// MODULE 7: TEORÍA DE JUEGOS (Game Theory)
+// ============================================================
+
+let lastGameData   = null;
+let gameMatrix     = [[10,30,25,15],[5,40,10,30],[15,25,5,10],[20,20,15,40]];
+let gameRowLabels  = ['E1','E2','E3','E4'];
+let gameColLabels  = ['U1','U2','U3','U4'];
+
+function buildGameMatrix() {
+  const container = document.getElementById('gameMatrixContainer');
+  if (!container) return;
+
+  let html = '<table id="gameTable" class="table table-bordered table-sm align-middle">';
+  html += '<thead class="table-dark"><tr><th></th>';
+  gameColLabels.forEach((cl, j) => {
+    html += `<th><input class="form-control form-control-sm game-col-label" data-col="${j}" value="${escapeHtml(cl)}" style="width:72px;display:inline-block">` +
+            `<button class="btn btn-sm btn-outline-danger ms-1 rm-col" data-col="${j}" title="Eliminar columna">✕</button></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  gameMatrix.forEach((row, i) => {
+    html += '<tr>';
+    html += `<td><input class="form-control form-control-sm game-row-label" data-row="${i}" value="${escapeHtml(gameRowLabels[i])}" style="width:56px;display:inline-block">` +
+            `<button class="btn btn-sm btn-outline-danger ms-1 rm-row" data-row="${i}" title="Eliminar fila">✕</button></td>`;
+    row.forEach((cell, j) => {
+      html += `<td><input type="number" class="form-control form-control-sm game-cell" data-row="${i}" data-col="${j}" value="${cell}" style="width:68px"></td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('.game-col-label').forEach(inp => {
+    inp.addEventListener('change', e => { gameColLabels[+e.target.dataset.col] = e.target.value; });
+  });
+  container.querySelectorAll('.game-row-label').forEach(inp => {
+    inp.addEventListener('change', e => { gameRowLabels[+e.target.dataset.row] = e.target.value; });
+  });
+  container.querySelectorAll('.game-cell').forEach(inp => {
+    inp.addEventListener('change', e => { gameMatrix[+e.target.dataset.row][+e.target.dataset.col] = parseFloat(e.target.value) || 0; });
+  });
+  container.querySelectorAll('.rm-col').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const j = +e.target.dataset.col;
+      gameColLabels.splice(j, 1);
+      gameMatrix.forEach(r => r.splice(j, 1));
+      buildGameMatrix();
+    });
+  });
+  container.querySelectorAll('.rm-row').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = +e.target.dataset.row;
+      gameRowLabels.splice(i, 1);
+      gameMatrix.splice(i, 1);
+      buildGameMatrix();
+    });
+  });
+}
+
+function addGameRow() {
+  gameRowLabels.push(`E${gameMatrix.length + 1}`);
+  gameMatrix.push(Array(gameColLabels.length).fill(0));
+  buildGameMatrix();
+}
+
+function addGameCol() {
+  gameColLabels.push(`U${gameColLabels.length + 1}`);
+  gameMatrix.forEach(r => r.push(0));
+  buildGameMatrix();
+}
+
+function syncGameStateFromDOM() {
+  document.querySelectorAll('.game-cell').forEach(inp => {
+    gameMatrix[+inp.dataset.row][+inp.dataset.col] = parseFloat(inp.value) || 0;
+  });
+  document.querySelectorAll('.game-col-label').forEach(inp => {
+    gameColLabels[+inp.dataset.col] = inp.value;
+  });
+  document.querySelectorAll('.game-row-label').forEach(inp => {
+    gameRowLabels[+inp.dataset.row] = inp.value;
+  });
+}
+
+async function computeGame() {
+  syncGameStateFromDOM();
+  const payload = {matrix: gameMatrix, row_labels: gameRowLabels, col_labels: gameColLabels};
+  const res  = await fetch('/compute_game_theory', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const data = await res.json();
+  lastGameData = data;
+  renderGameResults(data);
+}
+
+function renderGameResults(data) {
+  const area = document.getElementById('gameResultsArea');
+  if (!area) return;
+
+  const remainingRows = new Set(data.remaining_rows);
+  const remainingCols = new Set(data.remaining_cols);
+
+  // Texto introductorio
+  let html = `<div class="alert alert-secondary mb-3">
+    <p class="mb-1">Como complemento operativo al proyecto de inversión tecnológica, se analiza el impacto en los tiempos de espera en el despacho de vehículos (λ = 10 vehículos/hora).</p>
+    <p class="mb-0">La inversión en tecnología permite mejorar la tasa de servicio μ, reduciendo drásticamente las colas.</p>
+  </div>`;
+
+  // 1. Original matrix with strikethrough on eliminated strategies
+  html += '<h6 class="mt-2">Matriz Original de Pagos</h6>';
+  html += '<table class="table table-bordered table-sm"><thead class="table-secondary"><tr><th></th>';
+  data.col_labels.forEach((cl, j) => {
+    const elim = !remainingCols.has(j);
+    html += `<th${elim ? ' class="gt-eliminated"' : ''}>${escapeHtml(cl)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  data.original_matrix.forEach((row, i) => {
+    const rowElim = !remainingRows.has(i);
+    html += `<tr>`;
+    html += `<td${rowElim ? ' class="gt-eliminated"' : ''}><strong>${escapeHtml(data.row_labels[i])}</strong></td>`;
+    row.forEach((cell, j) => {
+      const colElim = !remainingCols.has(j);
+      html += `<td${(rowElim || colElim) ? ' class="gt-eliminated"' : ''}>${cell}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+
+  // 3. Reduced matrix
+  const rRows = data.remaining_rows.map(i => data.row_labels[i]);
+  const rCols = data.remaining_cols.map(j => data.col_labels[j]);
+  html += '<h6>Matriz Reducida</h6>';
+  html += '<table class="table table-bordered table-sm table-success"><thead><tr><th></th>';
+  rCols.forEach(cl => { html += `<th>${escapeHtml(cl)}</th>`; });
+  html += '</tr></thead><tbody>';
+  data.reduced_matrix.forEach((row, i) => {
+    html += `<tr><td><strong>${escapeHtml(rRows[i])}</strong></td>`;
+    row.forEach(cell => { html += `<td>${cell}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+
+  // 4. Mixed strategy solution
+  const ms = data.mixed_strategy;
+  if (ms && ms.valid) {
+    html += '<h6>Estrategia Mixta Óptima</h6>';
+    html += '<table class="table table-sm table-bordered"><tbody>';
+    html += `<tr class="best-ev"><td colspan="2"><strong>Valor del juego V = ${ms.value.toFixed(4)} M COP</strong></td></tr>`;
+    html += `<tr><td>JW — ${escapeHtml(ms.label_row0 || rRows[0])}</td><td>p = ${ms.p_row0.toFixed(4)}</td></tr>`;
+    if (ms.label_row1) {
+      html += `<tr><td>JW — ${escapeHtml(ms.label_row1)}</td><td>p = ${ms.p_row1.toFixed(4)}</td></tr>`;
+    }
+    html += `<tr><td>Sindicato — ${escapeHtml(ms.label_col0 || rCols[0])}</td><td>q = ${ms.q_col0.toFixed(4)}</td></tr>`;
+    if (ms.label_col1) {
+      html += `<tr><td>Sindicato — ${escapeHtml(ms.label_col1)}</td><td>q = ${ms.q_col1.toFixed(4)}</td></tr>`;
+    }
+    html += '</tbody></table>';
+  } else if (ms && ms.error) {
+    html += `<div class="alert alert-warning">${escapeHtml(ms.error)}</div>`;
+  }
+
+  if (data.note) {
+    html += `<div class="alert alert-info py-1">${escapeHtml(data.note)}</div>`;
+  }
+
+  // Chart goes above the conclusion
+  html += '<div id="gameDomChart" style="height:360px;margin:16px 0 8px;"></div>';
+
+  if (data.conclusion) {
+    html += `<div class="alert alert-success mt-2"><strong>Conclusión:</strong> ${escapeHtml(data.conclusion)}</div>`;
+  }
+
+  area.innerHTML = html;
+  renderDominanceChart(data);
+}
+
+function renderDominanceChart(data) {
+  const el = document.getElementById('gameDomChart');
+  if (!el || !data.original_matrix) return;
+  if (!data.mixed_strategy || !data.mixed_strategy.valid) return;
+  if (data.remaining_rows.length < 2 || data.remaining_cols.length < 2) return;
+
+  const ms  = data.mixed_strategy;
+  const rc  = data.remaining_cols;    // e.g. [U1_idx, U3_idx]
+  const rr  = data.remaining_rows;    // e.g. [E1_idx, E4_idx]
+  const mat = data.original_matrix;
+  const CL  = data.col_labels;
+  const RL  = data.row_labels;
+  const xs  = Array.from({length: 101}, (_, k) => k / 100);
+
+  // ── BLUE LINES: Sindicato's columns as function of p = P(JW plays rr[1]) ──
+  // f(p) = val_at_rr0*(1-p) + val_at_rr1*p
+  const bA0 = mat[rr[0]][rc[0]], bA1 = mat[rr[1]][rc[0]];  // col rc[0]: U1: 10→20
+  const bB0 = mat[rr[0]][rc[1]], bB1 = mat[rr[1]][rc[1]];  // col rc[1]: U3: 25→15
+  const blueA_ys = xs.map(p => bA0*(1-p) + bA1*p);
+  const blueB_ys = xs.map(p => bB0*(1-p) + bB1*p);
+
+  // ── OTHER LINES: JW's rows as function of q = P(Sindicato plays rc[1]) ──
+  // g(q) = val_at_rc0*(1-q) + val_at_rc1*q
+  const oA0 = mat[rr[0]][rc[0]], oA1 = mat[rr[0]][rc[1]];  // row rr[0]: E1: 10→25
+  const oB0 = mat[rr[1]][rc[0]], oB1 = mat[rr[1]][rc[1]];  // row rr[1]: E4: 20→15
+  const otherA_ys = xs.map(q => oA0*(1-q) + oA1*q);
+  const otherB_ys = xs.map(q => oB0*(1-q) + oB1*q);
+
+  // ── Intersection of blue lines: p* where bA(p) = bB(p) ──
+  const pDenom = (bA1 - bA0) - (bB1 - bB0);
+  const p_star = Math.abs(pDenom) > 1e-9 ? (bB0 - bA0) / pDenom : null;
+  const V_blue = p_star !== null ? bA0*(1-p_star) + bA1*p_star : null;
+
+  // ── Intersection of other lines: q* where oA(q) = oB(q) ──
+  const qDenom = (oA1 - oA0) - (oB1 - oB0);
+  const q_star = Math.abs(qDenom) > 1e-9 ? (oB0 - oA0) / qDenom : null;
+  const V_other = q_star !== null ? oA0*(1-q_star) + oA1*q_star : null;
+
+  const traces = [
+    // Blue: col rc[1] (U3): 25→15
+    {x:xs, y:blueB_ys, mode:'lines', name:`${CL[rc[1]]} (Sindicato)`,
+     line:{color:'#1d4ed8', width:2.5},
+     hovertemplate:`${CL[rc[1]]}: %{y:.1f}<extra></extra>`},
+    // Blue: col rc[0] (U1): 10→20
+    {x:xs, y:blueA_ys, mode:'lines', name:`${CL[rc[0]]} (Sindicato)`,
+     line:{color:'#60a5fa', width:2.5},
+     hovertemplate:`${CL[rc[0]]}: %{y:.1f}<extra></extra>`},
+    // Other: row rr[1] (E4): 20→15
+    {x:xs, y:otherB_ys, mode:'lines', name:`${RL[rr[1]]} (JW)`,
+     line:{color:'#7c3aed', width:2.5},
+     hovertemplate:`${RL[rr[1]]}: %{y:.1f}<extra></extra>`},
+    // Other: row rr[0] (E1): 10→25
+    {x:xs, y:otherA_ys, mode:'lines', name:`${RL[rr[0]]} (JW)`,
+     line:{color:'#c026d3', width:2.5},
+     hovertemplate:`${RL[rr[0]]}: %{y:.1f}<extra></extra>`},
+  ];
+
+  // Intersection marker traces
+  const mkr = (x, y, label, color) => ({
+    x:[x], y:[y], mode:'markers', showlegend:false,
+    marker:{size:11, color, line:{color:'#fff', width:2}},
+    hovertemplate:`${label}<extra></extra>`,
+  });
+  if (p_star !== null && p_star >= 0 && p_star <= 1)
+    traces.push(mkr(p_star, V_blue, `p*=${p_star.toFixed(2)}, V=${V_blue.toFixed(1)}`, '#1d4ed8'));
+  if (q_star !== null && q_star >= 0 && q_star <= 1)
+    traces.push(mkr(q_star, V_other, `q*=${q_star.toFixed(2)}, V=${V_other.toFixed(1)}`, '#7c3aed'));
+
+  // Shapes: vertical dashed at each intersection + horizontal at V
+  const V = ms.value;
+  const shapes = [
+    {type:'line', xref:'paper', yref:'y', x0:0, x1:1, y0:V, y1:V,
+     line:{color:'#dc2626', dash:'dot', width:1}},
+  ];
+  if (p_star !== null && p_star >= 0 && p_star <= 1)
+    shapes.push({type:'line', xref:'x', yref:'paper', x0:p_star, x1:p_star, y0:0, y1:1,
+      line:{color:'#1d4ed8', dash:'dash', width:1}});
+  if (q_star !== null && q_star >= 0 && q_star <= 1)
+    shapes.push({type:'line', xref:'x', yref:'paper', x0:q_star, x1:q_star, y0:0, y1:1,
+      line:{color:'#7c3aed', dash:'dash', width:1}});
+
+  // Right-side value labels at x=1 (paper coords = 1, data y = terminal value)
+  const annotations = [];
+  const rightVals = [
+    {y: bB1, color:'#1d4ed8'}, // U3 at p=1
+    {y: bA1, color:'#60a5fa'}, // U1 at p=1
+    {y: oB1, color:'#7c3aed'}, // E4 at q=1
+    {y: oA1, color:'#c026d3'}, // E1 at q=1
+  ];
+  rightVals.forEach(({y, color}) => {
+    annotations.push({
+      x:1.01, y, xref:'paper', yref:'y', xanchor:'left', yanchor:'middle',
+      text:`${y}`, showarrow:false, font:{color, size:11, weight:'bold'},
+    });
+  });
+  // V label on left
+  annotations.push({
+    x:0, y:V, xref:'paper', yref:'y', xanchor:'right', yanchor:'middle',
+    text:`V=${V}`, showarrow:false, font:{color:'#dc2626', size:10},
+    bgcolor:'rgba(255,255,255,0.8)',
+  });
+  // p* and q* labels below x-axis
+  if (p_star !== null && p_star >= 0 && p_star <= 1)
+    annotations.push({x:p_star, y:0, xref:'x', yref:'paper', xanchor:'center', yanchor:'top',
+      text:`p*=${p_star.toFixed(2)}`, showarrow:false, font:{color:'#1d4ed8', size:10}});
+  if (q_star !== null && q_star >= 0 && q_star <= 1)
+    annotations.push({x:q_star, y:0, xref:'x', yref:'paper', xanchor:'center', yanchor:'top',
+      text:`q*=${q_star.toFixed(2)}`, showarrow:false, font:{color:'#7c3aed', size:10}});
+
+  Plotly.newPlot(el, traces, {
+    title: {text:'GRÁFICA DOMINACIÓN — Estrategias Mixtas Óptimas', font:{size:13, weight:'bold'}},
+    xaxis: {
+      title:{text:`p = P(JW juega ${RL[rr[1]]})  |  q = P(Sindicato juega ${CL[rc[1]]})`, font:{size:10}},
+      range:[0,1], tickvals:[0,0.25,0.5,0.75,1], gridcolor:'#e5e7eb',
+    },
+    yaxis: {title:{text:'Pago esperado (M COP)', font:{size:10}}, gridcolor:'#e5e7eb'},
+    legend:{orientation:'h', x:0, y:-0.18, font:{size:10}},
+    margin:{t:50, b:80, l:60, r:55},
+    shapes, annotations,
+    height:360,
+    paper_bgcolor:'#fff', plot_bgcolor:'#f9fafb',
+    hovermode:'x unified',
+  }, {responsive:true, displayModeBar:false});
+}
+
+document.getElementById('gameComputeBtn').addEventListener('click', computeGame);
+document.getElementById('gameAddRowBtn').addEventListener('click', addGameRow);
+document.getElementById('gameAddColBtn').addEventListener('click', addGameCol);
+document.getElementById('nav-game').addEventListener('shown.bs.tab', () => {
+  if (!lastGameData) computeGame();
+  else renderGameResults(lastGameData);
+});
+
+buildGameMatrix();

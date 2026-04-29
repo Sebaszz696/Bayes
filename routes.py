@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify
 from compute import compute_all, build_tree_json
 from tree_render import render_tree_png
+from queueing import compute_queueing
+from game_theory import compute_game_theory
 
 bp = Blueprint('main', __name__)
 
@@ -29,3 +31,24 @@ def compute():
     res['tree_image'] = f"data:image/png;base64,{tree_img_b64}"
     
     return jsonify(res)
+
+
+@bp.route('/compute_queueing', methods=['POST'])
+def compute_queueing_route():
+    data = request.get_json() or {}
+    return jsonify(compute_queueing({
+        'lam':           float(data.get('lam', 10)),
+        'mu_mm1_actual': float(data.get('mu_mm1_actual', 12)),
+        'mu_mm1_mejor':  float(data.get('mu_mm1_mejor', 18)),
+        'mu_mm2':        float(data.get('mu_mm2', 12)),
+    }))
+
+
+@bp.route('/compute_game_theory', methods=['POST'])
+def compute_game_theory_route():
+    data = request.get_json() or {}
+    return jsonify(compute_game_theory({
+        'matrix':     data.get('matrix', [[10,30,25,15],[5,40,10,30],[15,25,5,10],[20,20,15,40]]),
+        'row_labels': data.get('row_labels', ['E1', 'E2', 'E3', 'E4']),
+        'col_labels': data.get('col_labels', ['U1', 'U2', 'U3', 'U4']),
+    }))
