@@ -691,8 +691,7 @@ function renderGameResults(data) {
 
   // Texto introductorio
   let html = `<div class="alert alert-secondary mb-3">
-    <p class="mb-1">Como complemento operativo al proyecto de inversión tecnológica, se analiza el impacto en los tiempos de espera en el despacho de vehículos (λ = 10 vehículos/hora).</p>
-    <p class="mb-0">La inversión en tecnología permite mejorar la tasa de servicio μ, reduciendo drásticamente las colas.</p>
+    
   </div>`;
 
   // 1. Original matrix with strikethrough on eliminated strategies

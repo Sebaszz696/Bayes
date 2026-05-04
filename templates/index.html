@@ -62,7 +62,10 @@
             <div class="tab-pane fade show active" id="tab-vars-pane" role="tabpanel">
               <div class="card mb-3">
                 <div class="card-body">
-                  <h5 class="card-title">Variables</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Teoría de Decisiones de Bayes</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryBayesModal">📖 Glosario</button>
+                  </div>
                   <form id="varsForm">
                     <div class="mb-2">
                       <label class="form-label">Nombre Estado 1</label>
@@ -126,7 +129,10 @@ Procesos</textarea>
             <div class="tab-pane fade" id="tab-queueing-pane" role="tabpanel">
               <div class="card mb-3">
                 <div class="card-body">
-                  <h5 class="card-title">Líneas de Espera — Comparación de Escenarios</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Líneas de Espera — Comparación de Escenarios</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryQueueingModal">📖 Glosario</button>
+                  </div>
                   <p class="text-muted small mb-3">
                     Este módulo evalúa el rendimiento del sistema de despacho de vehículos mediante teoría de colas.
                     Se comparan tres escenarios operativos — Canal Simple, Canal Mejorado y Canal Múltiple —
@@ -161,7 +167,10 @@ Procesos</textarea>
             <div class="tab-pane fade" id="tab-game-pane" role="tabpanel">
               <div class="card mb-3">
                 <div class="card-body">
-                  <h5 class="card-title">Teoría de Juegos — JW vs. Sindicato (Suma Cero)</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Teoría de Juegos — JW vs. Sindicato (Suma Cero)</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryGameModal">📖 Glosario</button>
+                  </div>
                   <div class="d-flex gap-2 mb-3 flex-wrap">
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="gameAddRowBtn">+ Estrategia JW</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="gameAddColBtn">+ Estrategia Sindicato</button>
@@ -172,6 +181,222 @@ Procesos</textarea>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 1: Glosario Teoría de Bayes -->
+    <div class="modal fade" id="glossaryBayesModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">📊 Glosario — Teoría de Decisiones de Bayes</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body small">
+            <h6 class="fw-bold mt-3">Conceptos clave:</h6>
+            <dl class="row">
+              <dt class="col-sm-4"><strong>Estado de naturaleza (S)</strong></dt>
+              <dd class="col-sm-8">Escenario futuro incierto fuera del control del decisor. Ej: "Demanda sostenible" o "Baja demanda".</dd>
+
+              <dt class="col-sm-4"><strong>Probabilidad previa P(S)</strong></dt>
+              <dd class="col-sm-8">Creencia inicial sobre la ocurrencia de cada estado, antes de información adicional.</dd>
+
+              <dt class="col-sm-4"><strong>Información muestral (F/U)</strong></dt>
+              <dd class="col-sm-8">Resultado de un estudio o prueba. Puede ser Favorable (F) o Desfavorable (U).</dd>
+
+              <dt class="col-sm-4"><strong>P(F|S) — Probabilidad condicional</strong></dt>
+              <dd class="col-sm-8">Probabilidad de obtener resultado F dado que ocurre estado S. Refleja la "confiabilidad" del estudio.</dd>
+
+              <dt class="col-sm-4"><strong>Teorema de Bayes</strong></dt>
+              <dd class="col-sm-8">Fórmula que actualiza probabilidades previas usando nueva información: P(S|F) = P(F|S)·P(S) / P(F)</dd>
+
+              <dt class="col-sm-4"><strong>Valor Esperado (EV)</strong></dt>
+              <dd class="col-sm-8">Media ponderada de los pagos: EV = Σ (Pago × Probabilidad). Criterio de decisión bajo incertidumbre.</dd>
+
+              <dt class="col-sm-4"><strong>EVPI — Valor Información Perfecta</strong></dt>
+              <dd class="col-sm-8">Máximo dispuesto a pagar por saber con certeza cuál estado ocurrirá. Cota superior teórica.</dd>
+
+              <dt class="col-sm-4"><strong>EVSI — Valor Información Muestral</strong></dt>
+              <dd class="col-sm-8">Máximo dispuesto a pagar por realizar el estudio. Respuesta a: ¿Vale la pena hacer un análisis?</dd>
+
+              <dt class="col-sm-4"><strong>Eficiencia del estudio</strong></dt>
+              <dd class="col-sm-8">Ratio EVSI / EVPI × 100%. Qué tan bueno es el estudio vs. información perfecta (0-100%).</dd>
+            </dl>
+            <hr>
+            <h6 class="fw-bold">¿Cómo usar el módulo?</h6>
+            <ol class="ps-3">
+              <li><strong>Tab 1 (Variables)</strong>: Define estados, probabilidades, y tabla de pagos.</li>
+              <li><strong>Tab 2 (Tablas)</strong>: Revisa 6 análisis de decisión (optimista, conservador, regret, EV, bayesiano, muestral).</li>
+              <li><strong>Tab 3 (Árbol)</strong>: Visualiza gráficamente el árbol de decisión con probabilidades y valores finales.</li>
+              <li><strong>Tab 4 (Gráficas)</strong>: Analiza sensibilidad: ¿cómo cambia la decisión si varía P(S1)?</li>
+              <li><strong>Tab 5 (Resumen)</strong>: Lee síntesis ejecutiva con KPIs (EV, EVPI, EVSI, eficiencia).</li>
+            </ol>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: Glosario Líneas de Espera -->
+    <div class="modal fade" id="glossaryQueueingModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">🚗 Glosario — Análisis de Líneas de Espera</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body small">
+            <h6 class="fw-bold mt-3">Conceptos clave:</h6>
+            <dl class="row">
+              <dt class="col-sm-4"><strong>λ (Lambda) — Tasa de llegada</strong></dt>
+              <dd class="col-sm-8">Número promedio de vehículos que llegan por unidad de tiempo (veh/hora). Sigue distribución Poisson.</dd>
+
+              <dt class="col-sm-4"><strong>μ (Mu) — Tasa de servicio</strong></dt>
+              <dd class="col-sm-8">Número promedio de vehículos atendidos por servidor por unidad de tiempo (veh/hora). Sigue distribución exponencial.</dd>
+
+              <dt class="col-sm-4"><strong>ρ (Rho) — Factor de utilización</strong></dt>
+              <dd class="col-sm-8">Porcentaje de tiempo que el servidor está ocupado. ρ = λ/μ. Si ρ ≥ 1, sistema inestable.</dd>
+
+              <dt class="col-sm-4"><strong>M/M/1 vs M/M/2</strong></dt>
+              <dd class="col-sm-8">Notación de Kendall. M=Markoviano (exponencial), primer número=llegadas, segundo=servicio, tercero=servidores. M/M/1 = 1 servidor, M/M/2 = 2 servidores.</dd>
+
+              <dt class="col-sm-4"><strong>L — Clientes en el sistema</strong></dt>
+              <dd class="col-sm-8">Número promedio de vehículos en el sistema (esperando + siendo atendidos). L = ρ/(1−ρ) para M/M/1.</dd>
+
+              <dt class="col-sm-4"><strong>Lq — Clientes en la cola</strong></dt>
+              <dd class="col-sm-8">Número promedio esperando en cola (sin servicio). Lq = ρ²/(1−ρ) para M/M/1.</dd>
+
+              <dt class="col-sm-4"><strong>W — Tiempo en el sistema</strong></dt>
+              <dd class="col-sm-8">Tiempo promedio que tarda cada vehículo (espera + servicio). W = L/λ.</dd>
+
+              <dt class="col-sm-4"><strong>Wq — Tiempo en la cola</strong></dt>
+              <dd class="col-sm-8">Tiempo promedio esperando antes de ser atendido. Wq = Lq/λ. Métrica clave de servicio.</dd>
+
+              <dt class="col-sm-4"><strong>P₀ — Prob. sistema vacío</strong></dt>
+              <dd class="col-sm-8">Probabilidad de entrar sin esperar. P₀ = 1−ρ para M/M/1. Indicador de "disponibilidad".</dd>
+
+              <dt class="col-sm-4"><strong>Erlang-C (M/M/c)</strong></dt>
+              <dd class="col-sm-8">Fórmulas para múltiples servidores (c > 1). Más complejas que M/M/1 pero permiten evaluar impacto de agregar capacidad.</dd>
+            </dl>
+            <hr>
+            <h6 class="fw-bold">Parámetros por escenario:</h6>
+            <table class="table table-sm table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Escenario</th>
+                  <th>λ (llegadas)</th>
+                  <th>μ (servicio)</th>
+                  <th>c (servidores)</th>
+                  <th>Modelo</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody class="small">
+                <tr>
+                  <td><strong>Canal Simple</strong></td>
+                  <td>10 veh/h</td>
+                  <td>12 veh/h</td>
+                  <td>1</td>
+                  <td>M/M/1</td>
+                  <td>Situación actual, sin inversión</td>
+                </tr>
+                <tr>
+                  <td><strong>Canal Mejorado</strong></td>
+                  <td>10 veh/h</td>
+                  <td>18 veh/h</td>
+                  <td>1</td>
+                  <td>M/M/1</td>
+                  <td>Con inversión tecnológica (μ aumenta 50%)</td>
+                </tr>
+                <tr class="table-info">
+                  <td><strong>Canal Múltiple</strong></td>
+                  <td>10 veh/h</td>
+                  <td>12 veh/h</td>
+                  <td>2</td>
+                  <td>M/M/2</td>
+                  <td>Alternativa: agregar segundo servidor</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small mt-2"><strong>Nota sobre P₀:</strong> Aunque Canal Mejorado tiene P₀ más alto (0.444 vs 0.410), Canal Múltiple es mejor en las métricas operacionales que importan: Wq y L. P₀ por sí sola no es la métrica decisiva.</p>
+            <hr>
+            <h6 class="fw-bold">¿Cómo usar el módulo?</h6>
+            <ol class="ps-3">
+              <li>Ingresa <strong>λ</strong> (tasa de llegada) y las tres tasas de servicio (μ actual, mejorada, múltiple).</li>
+              <li>Haz clic en <strong>Calcular</strong>.</li>
+              <li>Compara los 3 escenarios en la tabla. El mejor en cada métrica tiene ★.</li>
+              <li>Lee la conclusión: qué escenario minimiza esperas.</li>
+              <li>Toma decisión: ¿Invertir en tecnología (mejorada) o agregar servidor (múltiple)?</li>
+            </ol>
+            <p class="mt-2"><strong>Nota:</strong> Si ρ ≥ 1, el sistema es inestable (cola crece sin límite). Aumenta μ o agrega servidores.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: Glosario Teoría de Juegos -->
+    <div class="modal fade" id="glossaryGameModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">♟️ Glosario — Teoría de Juegos</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body small">
+            <h6 class="fw-bold mt-3">Conceptos clave:</h6>
+            <dl class="row">
+              <dt class="col-sm-4"><strong>Juego de suma cero</strong></dt>
+              <dd class="col-sm-8">Lo que gana un jugador, el otro lo pierde. Total de pagos = 0. Conflicto puro, sin cooperación.</dd>
+
+              <dt class="col-sm-4"><strong>Estrategia pura</strong></dt>
+              <dd class="col-sm-8">El jugador elige una acción específica con certeza (100% probabilidad). Ej: "JW siempre juega E1".</dd>
+
+              <dt class="col-sm-4"><strong>Estrategia mixta</strong></dt>
+              <dd class="col-sm-8">El jugador juega varias acciones con probabilidades específicas. Ej: "JW juega E1 con 50% y E4 con 50%".</dd>
+
+              <dt class="col-sm-4"><strong>Estrategia dominada</strong></dt>
+              <dd class="col-sm-8">Una estrategia que nunca es mejor que otra, sin importar qué haga el rival. Se puede eliminar sin pérdida.</dd>
+
+              <dt class="col-sm-4"><strong>Dominancia iterada</strong></dt>
+              <dd class="col-sm-8">Proceso de eliminar iterativamente estrategias dominadas hasta obtener matriz irreducible o solución en estrategias puras.</dd>
+
+              <dt class="col-sm-4"><strong>Equilibrio de Nash mixto</strong></dt>
+              <dd class="col-sm-8">Perfil de probabilidades donde ningún jugador quiere desviarse. Ambos ganan lo mismo si el rival juega óptimamente.</dd>
+
+              <dt class="col-sm-4"><strong>Ecuación de indiferencia</strong></dt>
+              <dd class="col-sm-8">Ecuación que hace que el rival sea indiferente entre sus opciones. Ej: Col1·p + Col2·(1−p) = ambas columnas dan igual EV.</dd>
+
+              <dt class="col-sm-4"><strong>Valor del juego (V)</strong></dt>
+              <dd class="col-sm-8">El pago esperado en equilibrio de Nash. Si V > 0, jugador fila (JW) gana; si V < 0, pierde.</dd>
+
+              <dt class="col-sm-4"><strong>Matriz de pagos</strong></dt>
+              <dd class="col-sm-8">Tabla con filas=estrategias JW, columnas=estrategias Sindicato, celdas=pago a JW en millones COP.</dd>
+
+              <dt class="col-sm-4"><strong>Reducción por dominancia</strong></dt>
+              <dd class="col-sm-8">Elimina columnas si toda una columna es peor (para minimizador Sindicato), y filas si toda una fila es peor (para maximizador JW).</dd>
+            </dl>
+            <hr>
+            <h6 class="fw-bold">¿Cómo usar el módulo?</h6>
+            <ol class="ps-3">
+              <li><strong>Ingresa o edita</strong> la matriz de pagos. Ajusta estrategias y valores según tu caso.</li>
+              <li>Haz clic en <strong>Calcular</strong>.</li>
+              <li>Revisa la <strong>matriz original</strong> con estrategias eliminadas (tachadas).</li>
+              <li>Lee la <strong>matriz reducida</strong> final después de eliminar dominancias.</li>
+              <li>Mira la <strong>tabla de estrategias mixtas</strong>: probabilidades óptimas de cada jugador y valor V del juego.</li>
+              <li>Revisa la <strong>gráfica de dominancia</strong>: visualiza cómo los payoffs varían según las probabilidades mixtas.</li>
+              <li>Lee la <strong>conclusión</strong>: interpretación estratégica del resultado en contexto empresarial.</li>
+            </ol>
+            <p class="mt-2"><strong>Nota:</strong> Botones "+ Estrategia" te permiten agregar filas/columnas dinámicamente para analizar otros escenarios.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           </div>
         </div>
       </div>
