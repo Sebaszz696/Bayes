@@ -13,6 +13,9 @@
     <nav class="navbar navbar-dark bg-dark mb-3">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Teoría de Decisiones</a>
+        <button type="button" class="btn btn-sm btn-outline-light" id="downloadAllBtn" title="Descargar informe completo en PDF">
+          ⬇ Descargar todo
+        </button>
       </div>
     </nav>
 
@@ -53,6 +56,20 @@
             </button>
             <div class="collapse" id="collapseQueueing">
               <a class="list-group-item list-group-item-action ps-4" id="nav-queueing" data-bs-toggle="list" href="#tab-queueing-pane" role="tab" aria-controls="tab-queueing-pane">Ver análisis</a>
+            </div>
+
+            <!-- Módulo: PERT/CPM (desplegable) -->
+            <button class="list-group-item list-group-item-dark py-2 px-3 mt-1 d-flex justify-content-between align-items-center border-0 w-100 text-start"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapsePertCpm" aria-expanded="false"
+                    style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;">
+              PERT/CPM <span class="ms-1">▾</span>
+            </button>
+            <div class="collapse" id="collapsePertCpm">
+              <a class="list-group-item list-group-item-action ps-4" id="nav-pert-actividades" data-bs-toggle="list" href="#tab-pert-actividades-pane" role="tab" aria-controls="tab-pert-actividades-pane">Actividades</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-pert-forward"     data-bs-toggle="list" href="#tab-pert-forward-pane"     role="tab" aria-controls="tab-pert-forward-pane">Forward Pass</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-pert-backward"    data-bs-toggle="list" href="#tab-pert-backward-pane"    role="tab" aria-controls="tab-pert-backward-pane">Backward Pass</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-pert-holguras"    data-bs-toggle="list" href="#tab-pert-holguras-pane"    role="tab" aria-controls="tab-pert-holguras-pane">Holguras</a>
+              <a class="list-group-item list-group-item-action ps-4" id="nav-pert-red"         data-bs-toggle="list" href="#tab-pert-red-pane"         role="tab" aria-controls="tab-pert-red-pane">Red PERT</a>
             </div>
           </div>
         </div>
@@ -178,6 +195,322 @@ Procesos</textarea>
                   </div>
                   <div id="gameMatrixContainer" class="table-responsive mb-3"></div>
                   <div id="gameResultsArea"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB PERT-1: Actividades -->
+            <div class="tab-pane fade" id="tab-pert-actividades-pane" role="tabpanel">
+
+              <!-- Descripción General -->
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">Programación de Proyectos — PERT/CPM</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryPertCpmModal">📖 Glosario</button>
+                  </div>
+                  <p class="mb-2">
+                    Este módulo aplica la metodología <strong>PERT/CPM</strong> para la planificación de proyectos logísticos
+                    asociados al <strong>PETI 2025-2028</strong>. El objetivo es modelar y optimizar la implementación de un nuevo
+                    nodo logístico y tecnológico dentro de la organización.
+                  </p>
+                  <p class="text-muted small mb-0">La metodología permite:</p>
+                  <ul class="small mb-0">
+                    <li>Identificar actividades críticas.</li>
+                    <li>Calcular tiempos mínimos de ejecución.</li>
+                    <li>Detectar retrasos potenciales.</li>
+                    <li>Optimizar recursos operativos y tecnológicos.</li>
+                    <li>Mejorar la toma de decisiones estratégicas.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Contexto Empresarial -->
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h6 class="fw-bold">Ejercicios Predefinidos — Contexto PETI 2025-2028</h6>
+                  <p class="small mb-3">
+                    El módulo incluye dos casos de aplicación reales del PETI 2025-2028. Cada uno puede cargarse con los botones de arriba o ingresarse manualmente.
+                  </p>
+
+                  <!-- Ejercicio 1 -->
+                  <div class="border rounded p-2 mb-3 bg-light">
+                    <p class="small fw-bold mb-1">📦 Ejercicio 1 — Proyecto Logístico (Actividades A–H)</p>
+                    <p class="small mb-2">
+                      La organización busca modernizar el sistema de despacho y transporte de mercancías mediante
+                      integración tecnológica y optimización operativa. El proyecto requiere coordinar 8 actividades
+                      dependientes para implementar un nuevo nodo logístico.
+                    </p>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <ul class="small mb-1">
+                          <li><strong>A</strong> — Planificación de rutas y red de transporte</li>
+                          <li><strong>B</strong> — Contratación de proveedores de carga</li>
+                          <li><strong>C</strong> — Adecuación física del centro de despacho</li>
+                          <li><strong>D</strong> — Mantenimiento y revisión de flota vehicular</li>
+                        </ul>
+                      </div>
+                      <div class="col-md-6">
+                        <ul class="small mb-1">
+                          <li><strong>E</strong> — Capacitación de conductores</li>
+                          <li><strong>F</strong> — Instalación del software TMS</li>
+                          <li><strong>G</strong> — Despacho del primer lote de prueba</li>
+                          <li><strong>H</strong> — Auditoría final de entrega</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <p class="small text-muted mb-0">Duración total: <strong>21 días</strong> — Ruta crítica: <strong>A → C → F → H</strong></p>
+                  </div>
+
+                  <!-- Ejercicio 2 -->
+                  <div class="border rounded p-2 mb-2 bg-light">
+                    <p class="small fw-bold mb-1">🏭 Ejercicio 2 — Automatización de Inventarios con RFID (Actividades I–P)</p>
+                    <p class="small mb-2">
+                      <strong>RFID</strong> (<em>Radio Frequency Identification</em>) es una tecnología de identificación automática
+                      mediante ondas de radio. Permite rastrear productos en tiempo real sin necesidad de visión directa,
+                      reemplazando los lectores de código de barras. Este proyecto automatiza el control de inventarios
+                      del almacén de la organización integrando lectores RFID con el sistema <strong>TMS</strong>
+                      (<em>Transportation Management System</em>).
+                    </p>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <ul class="small mb-1">
+                          <li><strong>I</strong> — Análisis de requerimientos</li>
+                          <li><strong>J</strong> — Selección de proveedor RFID</li>
+                          <li><strong>K</strong> — Adecuación del almacén</li>
+                          <li><strong>L</strong> — Instalación de lectores y antenas</li>
+                        </ul>
+                      </div>
+                      <div class="col-md-6">
+                        <ul class="small mb-1">
+                          <li><strong>M</strong> — Configuración del software</li>
+                          <li><strong>N</strong> — Pruebas piloto</li>
+                          <li><strong>O</strong> — Capacitación del personal</li>
+                          <li><strong>P</strong> — Integración con TMS</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <p class="small text-muted mb-0">Duración total: <strong>21 días</strong> — Ruta crítica: <strong>I → K → L → M → O → P</strong></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fundamentos -->
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-2">Fundamentos de PERT/CPM</h6>
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-sm small">
+                      <thead class="table-dark"><tr><th>Término</th><th>Definición</th></tr></thead>
+                      <tbody>
+                        <tr><td><strong>PERT</strong></td><td><em>Program Evaluation and Review Technique</em> — planificación de proyectos mediante redes de actividades.</td></tr>
+                        <tr><td><strong>CPM</strong></td><td><em>Critical Path Method</em> — identifica la ruta crítica de un proyecto determinístico.</td></tr>
+                        <tr><td><strong>Actividad</strong></td><td>Tarea específica que debe ejecutarse dentro del proyecto.</td></tr>
+                        <tr><td><strong>Predecesor</strong></td><td>Actividad que debe finalizar antes de iniciar otra.</td></tr>
+                        <tr><td><strong>IP</strong></td><td>Inicio Próximo — tiempo más temprano de inicio.</td></tr>
+                        <tr><td><strong>TP</strong></td><td>Terminación Próxima — tiempo más temprano de finalización.</td></tr>
+                        <tr><td><strong>IL</strong></td><td>Inicio Lejano — último tiempo posible para iniciar sin retrasar el proyecto.</td></tr>
+                        <tr><td><strong>TL</strong></td><td>Terminación Lejana — último tiempo posible para finalizar sin retrasar el proyecto.</td></tr>
+                        <tr><td><strong>Holgura</strong></td><td>Tiempo que puede retrasarse una actividad sin afectar la fecha final.</td></tr>
+                        <tr><td><strong>Ruta Crítica</strong></td><td>Conjunto de actividades con holgura = 0. Determina la duración mínima del proyecto.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actividades editables -->
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-2">Actividades del Proyecto</h6>
+                  <p class="text-muted small mb-3">Carga un ejercicio predefinido o ingresa tus propias actividades. Al hacer clic en <strong>Calcular</strong>, los resultados estarán disponibles en los demás tabs.</p>
+                  <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                    <span class="fw-bold text-muted small">Cargar ejercicio:</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadPertPreset('logistico')">📦 Proyecto Logístico (A–H)</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadPertPreset('inventarios')">🏭 Inventarios RFID (I–P)</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="addPertRow()">+ Agregar actividad</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="pertClearBtn">🗑 Limpiar tabla</button>
+                  </div>
+                  <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-sm" id="pertActivitiesTable">
+                      <thead class="table-dark">
+                        <tr>
+                          <th style="width:60px">ID</th>
+                          <th>Descripción</th>
+                          <th style="width:140px">Predecesores (coma)</th>
+                          <th style="width:95px">Duración (días)</th>
+                          <th style="width:50px"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="pertActivitiesBody"></tbody>
+                    </table>
+                  </div>
+                  <button type="button" class="btn btn-primary" id="pertCpmComputeBtn">Calcular</button>
+                  <div id="pertComputeStatus" class="mt-2"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB PERT-2: Forward Pass -->
+            <div class="tab-pane fade" id="tab-pert-forward-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">Forward Pass — Cálculo de Tiempos Tempranos</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryPertCpmModal">📖 Glosario</button>
+                  </div>
+                  <p class="mb-2">
+                    El <strong>recorrido hacia adelante</strong> permite calcular los tiempos tempranos de cada actividad,
+                    determinando cuándo puede comenzar y terminar cada tarea en el escenario más optimista.
+                    Se recorre la red de izquierda a derecha siguiendo el orden topológico.
+                  </p>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <div class="alert alert-secondary py-2 small mb-0">
+                        <strong>Procedimiento:</strong>
+                        <ol class="mb-0 ps-3 mt-1">
+                          <li>Iniciar con <strong>IP = 0</strong> para actividades sin predecesor.</li>
+                          <li>Calcular <strong>TP = IP + Duración</strong>.</li>
+                          <li>Para cada sucesora: <strong>IP = max(TP de todos sus predecesores)</strong>.</li>
+                          <li>El TP máximo entre las actividades finales es la <strong>duración total del proyecto</strong>.</li>
+                        </ol>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="alert alert-primary py-2 small mb-0">
+                        <strong>Fórmulas:</strong><br>
+                        <code>TP = IP + Duración</code><br>
+                        <code>IP = max(TP de predecesores)</code><br>
+                        <span class="text-muted">Actividades en <span class="badge bg-danger">rojo</span> pertenecen a la ruta crítica.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="pertForwardArea"><p class="text-muted small">Haz clic en <strong>Calcular</strong> en el tab Actividades primero.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB PERT-3: Backward Pass -->
+            <div class="tab-pane fade" id="tab-pert-backward-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">Backward Pass — Cálculo de Tiempos Lejanos</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryPertCpmModal">📖 Glosario</button>
+                  </div>
+                  <p class="mb-2">
+                    El <strong>recorrido hacia atrás</strong> permite identificar el <em>último momento posible</em> en que
+                    cada actividad puede iniciar o finalizar sin retrasar la fecha de entrega del proyecto.
+                    Se recorre la red de derecha a izquierda.
+                  </p>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <div class="alert alert-secondary py-2 small mb-0">
+                        <strong>Procedimiento:</strong>
+                        <ol class="mb-0 ps-3 mt-1">
+                          <li>Iniciar con <strong>TL = duración total</strong> para actividades finales (sin sucesoras).</li>
+                          <li>Calcular <strong>IL = TL − Duración</strong>.</li>
+                          <li>Para cada predecesora: <strong>TL = min(IL de todas sus sucesoras)</strong>.</li>
+                        </ol>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="alert alert-primary py-2 small mb-0">
+                        <strong>Fórmulas:</strong><br>
+                        <code>IL = TL − Duración</code><br>
+                        <code>TL = min(IL de sucesoras)</code><br>
+                        <span class="text-muted">La tabla se muestra en <strong>orden inverso</strong> al topológico.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="pertBackwardArea"><p class="text-muted small">Haz clic en <strong>Calcular</strong> en el tab Actividades primero.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB PERT-4: Holguras -->
+            <div class="tab-pane fade" id="tab-pert-holguras-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">Holguras y Ruta Crítica</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryPertCpmModal">📖 Glosario</button>
+                  </div>
+                  <p class="mb-2">
+                    La <strong>holgura</strong> representa el tiempo disponible que tiene una actividad para retrasarse
+                    sin afectar la fecha final del proyecto. Una holgura de cero indica que la actividad
+                    es <strong>crítica</strong>: cualquier retraso en ella impacta directamente el plazo de entrega.
+                  </p>
+
+                  <!-- Tabla de fórmulas -->
+                  <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-sm small">
+                      <thead class="table-dark"><tr><th>Concepto</th><th>Fórmula</th><th>Descripción</th></tr></thead>
+                      <tbody>
+                        <tr><td><strong>Tiempo Próximo (TP)</strong></td><td><code>TP = IP + Duración</code></td><td>Calcula el tiempo temprano de finalización.</td></tr>
+                        <tr><td><strong>Inicio Lejano (IL)</strong></td><td><code>IL = TL − Duración</code></td><td>Calcula el último inicio permitido.</td></tr>
+                        <tr class="table-warning"><td><strong>Holgura (H)</strong></td><td><code>H = IL − IP</code></td><td>Tiempo disponible antes de afectar el proyecto.</td></tr>
+                        <tr class="table-danger fw-bold"><td><strong>Ruta Crítica</strong></td><td><code>H = 0</code></td><td>Duración mínima del proyecto.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div id="pertHolgurasArea"><p class="text-muted small">Haz clic en <strong>Calcular</strong> en el tab Actividades primero.</p></div>
+
+                  <!-- Conclusiones técnicas estáticas -->
+                  <div class="alert alert-light border mt-3 small">
+                    <h6 class="fw-bold">Conclusiones Técnicas</h6>
+                    <p class="mb-1">
+                      La metodología PERT/CPM permite modelar de manera estructurada el proyecto logístico del PETI 2025-2028.
+                      La <strong>ruta crítica</strong> determina que cualquier retraso en las actividades críticas impacta
+                      directamente la fecha final del proyecto.
+                    </p>
+                    <p class="mb-0">
+                      Las actividades con <strong>holgura &gt; 0</strong> proporcionan flexibilidad operativa para redistribuir
+                      recursos sin afectar el plazo. La implementación de esta metodología fortalece la planeación
+                      estratégica y mejora la gestión del tiempo dentro del entorno logístico y tecnológico.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB PERT-5: Red PERT -->
+            <div class="tab-pane fade" id="tab-pert-red-pane" role="tabpanel">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">Red PERT/CPM</h5>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#glossaryPertCpmModal">📖 Glosario</button>
+                  </div>
+                  <p class="mb-2">
+                    El <strong>diagrama de red</strong> representa gráficamente las actividades del proyecto como nodos
+                    y sus dependencias como flechas dirigidas. Permite visualizar de un vistazo la secuencia de
+                    ejecución, las dependencias entre tareas y la ruta crítica del proyecto.
+                  </p>
+                  <div class="row mb-3">
+                    <div class="col-md-7">
+                      <div class="alert alert-secondary py-2 small mb-0">
+                        <strong>Cómo leer el diagrama:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                          <li>Cada <strong>nodo</strong> representa una actividad del proyecto.</li>
+                          <li>Las <strong>flechas</strong> indican relaciones de precedencia.</li>
+                          <li>Pasa el cursor sobre un nodo para ver IP, TP, IL, TL y Holgura.</li>
+                          <li>La secuencia de nodos rojos conectados forma la <strong>ruta crítica</strong>.</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="col-md-5">
+                      <div class="alert alert-light border py-2 small mb-0">
+                        <span class="badge bg-danger me-1">&nbsp;&nbsp;</span> Nodo / arista en <strong>ruta crítica</strong> (H = 0)<br>
+                        <span class="badge bg-primary me-1">&nbsp;&nbsp;</span> Nodo con <strong>holgura</strong> (H &gt; 0)<br>
+                        <span style="color:#adb5bd;">─────</span> Arista <strong>no crítica</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="pertRedArea"></div>
+                  <div id="pertNetworkChart" style="min-height:420px;"></div>
+                  <p class="text-muted small mt-2 mb-0">Haz clic en <strong>Calcular</strong> (tab Actividades) para generar el diagrama. El título cambia según el ejercicio cargado.</p>
                 </div>
               </div>
             </div>
@@ -402,8 +735,85 @@ Procesos</textarea>
       </div>
     </div>
 
+    <!-- MODAL 4: Glosario PERT/CPM -->
+    <div class="modal fade" id="glossaryPertCpmModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">📅 Glosario — Programación de Proyectos PERT/CPM</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body small">
+            <h6 class="fw-bold mt-3">Conceptos clave:</h6>
+            <dl class="row">
+              <dt class="col-sm-4"><strong>PERT</strong></dt>
+              <dd class="col-sm-8">Program Evaluation and Review Technique. Técnica de red para proyectos con incertidumbre en duraciones.</dd>
+
+              <dt class="col-sm-4"><strong>CPM</strong></dt>
+              <dd class="col-sm-8">Critical Path Method — Método de la Ruta Crítica. Para proyectos determinísticos con duraciones fijas.</dd>
+
+              <dt class="col-sm-4"><strong>Actividad</strong></dt>
+              <dd class="col-sm-8">Tarea específica del proyecto con duración definida. Representada como nodo o flecha en la red.</dd>
+
+              <dt class="col-sm-4"><strong>Predecesor</strong></dt>
+              <dd class="col-sm-8">Actividad que debe finalizar antes de que otra pueda comenzar. Define las dependencias del proyecto.</dd>
+
+              <dt class="col-sm-4"><strong>IP — Inicio Próximo</strong></dt>
+              <dd class="col-sm-8">Tiempo más temprano en que puede comenzar una actividad. IP = max(TP de todos sus predecesores).</dd>
+
+              <dt class="col-sm-4"><strong>TP — Terminación Próxima</strong></dt>
+              <dd class="col-sm-8">Tiempo más temprano de finalización. TP = IP + Duración.</dd>
+
+              <dt class="col-sm-4"><strong>IL — Inicio Lejano</strong></dt>
+              <dd class="col-sm-8">Último momento posible para iniciar sin retrasar el proyecto. IL = TL − Duración.</dd>
+
+              <dt class="col-sm-4"><strong>TL — Terminación Lejana</strong></dt>
+              <dd class="col-sm-8">Último momento posible de finalización. TL = min(IL de todas sus actividades sucesoras).</dd>
+
+              <dt class="col-sm-4"><strong>Holgura (H)</strong></dt>
+              <dd class="col-sm-8">Tiempo de margen que tiene una actividad sin retrasar el proyecto. H = IL − IP. Si H = 0, la actividad es crítica.</dd>
+
+              <dt class="col-sm-4"><strong>Ruta Crítica</strong></dt>
+              <dd class="col-sm-8">Secuencia de actividades con holgura cero. Determina la duración mínima del proyecto. Cualquier retraso en ella retrasa el proyecto.</dd>
+            </dl>
+            <hr>
+            <h6 class="fw-bold">Tecnologías de los ejercicios:</h6>
+            <dl class="row">
+              <dt class="col-sm-4"><strong>RFID</strong></dt>
+              <dd class="col-sm-8"><em>Radio Frequency Identification</em> — tecnología de identificación automática mediante ondas de radio. Permite rastrear objetos en tiempo real sin contacto físico ni visión directa. Se usa para automatizar el control de inventarios en almacenes.</dd>
+
+              <dt class="col-sm-4"><strong>TMS</strong></dt>
+              <dd class="col-sm-8"><em>Transportation Management System</em> — software de gestión de transporte. Planifica, ejecuta y optimiza el movimiento de mercancías. En el PETI 2025-2028 se integra con los lectores RFID para visibilidad total del inventario en tránsito.</dd>
+
+              <dt class="col-sm-4"><strong>Nodo logístico</strong></dt>
+              <dd class="col-sm-8">Centro de distribución o almacén que concentra, clasifica y redistribuye mercancías. El Ejercicio 1 planifica la implementación de un nuevo nodo dentro de la red de la organización.</dd>
+
+              <dt class="col-sm-4"><strong>Automatización</strong></dt>
+              <dd class="col-sm-8">Sustitución de procesos manuales (como conteo de inventario) por sistemas tecnológicos (como RFID) que operan con menor intervención humana, mayor velocidad y menos errores.</dd>
+            </dl>
+            <hr>
+            <h6 class="fw-bold">¿Cómo usar el módulo?</h6>
+            <ol class="ps-3">
+              <li>Carga un <strong>ejercicio predefinido</strong> (Proyecto Logístico o Inventarios RFID) o ingresa tus propias actividades.</li>
+              <li>Edita la tabla: ID, descripción, predecesores (separados por comas) y duración en días.</li>
+              <li>Haz clic en <strong>Calcular</strong>.</li>
+              <li>Revisa la <strong>Tabla Forward Pass</strong>: IP y TP de cada actividad.</li>
+              <li>Revisa la <strong>Tabla Backward Pass</strong>: TL e IL de cada actividad.</li>
+              <li>Revisa la <strong>Tabla de Holguras</strong>: identifica actividades críticas (H = 0, fondo rojo).</li>
+              <li>Lee la <strong>Ruta Crítica</strong> y la duración total del proyecto.</li>
+            </ol>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script src="/static/js/tree-d3.js"></script>
     <script src="/static/js/main.js"></script>

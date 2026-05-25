@@ -480,41 +480,151 @@ computeAndRender();
 // Attach download buttons to each main tab pane so user can export any section
 function attachSectionDownloadButtons(){
   const panes = [
-    {id:'tab-vars-pane', title:'Variables'},
-    {id:'tab-tables-pane', title:'Tablas'},
-    {id:'tab-tree-pane', title:'Arbol'},
-    {id:'tab-charts-pane', title:'Graficas'},
-    {id:'tab-summary-pane', title:'Resumen'},
-    {id:'tab-queueing-pane', title:'Lineas_Espera'},
-    {id:'tab-game-pane', title:'Teoria_Juegos'}
+    {id:'tab-vars-pane',              title:'Bayes_Variables'},
+    {id:'tab-tables-pane',            title:'Bayes_Tablas'},
+    {id:'tab-tree-pane',              title:'Bayes_Arbol'},
+    {id:'tab-charts-pane',            title:'Bayes_Graficas'},
+    {id:'tab-summary-pane',           title:'Bayes_Resumen'},
+    {id:'tab-queueing-pane',          title:'Lineas_Espera'},
+    {id:'tab-game-pane',              title:'Teoria_Juegos'},
+    {id:'tab-pert-actividades-pane',  title:'PERT_Actividades'},
+    {id:'tab-pert-forward-pane',      title:'PERT_Forward_Pass'},
+    {id:'tab-pert-backward-pane',     title:'PERT_Backward_Pass'},
+    {id:'tab-pert-holguras-pane',     title:'PERT_Holguras'},
+    {id:'tab-pert-red-pane',          title:'PERT_Red'},
   ];
   panes.forEach((p, idx)=>{
     const pane = document.getElementById(p.id);
     if(!pane) return;
-    // avoid duplicate button
     if(pane.querySelector('.download-section-btn')) return;
     const wrapper = document.createElement('div');
     wrapper.className = 'd-flex justify-content-end mb-2';
     const btn = document.createElement('button');
-    btn.className = 'btn btn-sm btn-outline-primary download-section-btn';
-    btn.textContent = 'Descargar PDF';
-    btn.title = `Descargar sección: ${p.title}`;
+    btn.className = 'btn btn-sm btn-outline-secondary download-section-btn';
+    btn.innerHTML = '⬇ PDF';
+    btn.title = `Descargar módulo: ${p.title.replace(/_/g,' ')}`;
     wrapper.appendChild(btn);
-    // insert at top of pane
     pane.insertBefore(wrapper, pane.firstChild);
     btn.addEventListener('click', ()=>{
       const nodeToExport = (p.id==='tab-summary-pane') ? pane.querySelector('.report') || pane : pane;
-      if(!nodeToExport){ alert('No hay contenido para exportar en esta sección.'); return; }
       if(typeof html2pdf === 'undefined'){ alert('html2pdf no está disponible.'); return; }
-      const filename = `seccion_${idx+1}_${p.title.replace(/\s+/g,'_')}.pdf`;
+      const filename = `${p.title}.pdf`;
       const opt = { margin:0.5, filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in', format:'a4', orientation:'portrait'} };
       html2pdf().set(opt).from(nodeToExport).save();
     });
   });
 }
 
+async function downloadAllModulesPDF() {
+  if(typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+    alert('Librerías PDF no cargadas. Recarga la página e intenta de nuevo.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const btn = document.getElementById('downloadAllBtn');
+  btn.disabled = true;
+  const origHTML = btn.innerHTML;
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+
+  const sections = [
+    { navId:'nav-vars',             paneId:'tab-vars-pane',             label:'Bayes — Variables' },
+    { navId:'nav-tables',           paneId:'tab-tables-pane',           label:'Bayes — Tablas' },
+    { navId:'nav-tree',             paneId:'tab-tree-pane',             label:'Bayes — Árbol' },
+    { navId:'nav-charts',           paneId:'tab-charts-pane',           label:'Bayes — Gráficas' },
+    { navId:'nav-summary',          paneId:'tab-summary-pane',          label:'Bayes — Resumen' },
+    { navId:'nav-queueing',         paneId:'tab-queueing-pane',         label:'Líneas de Espera',    calcCheck:()=>lastQueueingData,  calcBtnId:'queueingComputeBtn' },
+    { navId:'nav-game',             paneId:'tab-game-pane',             label:'Teoría de Juegos',    calcCheck:()=>lastGameData,       calcBtnId:'gameComputeBtn' },
+    { navId:'nav-pert-actividades', paneId:'tab-pert-actividades-pane', label:'PERT — Actividades' },
+    { navId:'nav-pert-forward',     paneId:'tab-pert-forward-pane',     label:'PERT — Forward Pass', calcCheck:()=>lastPertCpmData,    calcBtnId:'pertCpmComputeBtn' },
+    { navId:'nav-pert-backward',    paneId:'tab-pert-backward-pane',    label:'PERT — Backward Pass' },
+    { navId:'nav-pert-holguras',    paneId:'tab-pert-holguras-pane',    label:'PERT — Holguras' },
+    { navId:'nav-pert-red',         paneId:'tab-pert-red-pane',         label:'PERT — Red PERT' },
+  ];
+
+  const pdf = new jsPDF({ unit:'pt', format:'a4', orientation:'portrait' });
+  const A4W = 595.28, A4H = 841.89, MARGIN = 30;
+  const contentW = A4W - 2 * MARGIN;
+  let firstPage = true;
+
+  try {
+    for(let i = 0; i < sections.length; i++) {
+      const s = sections[i];
+      btn.innerHTML = `⏳ ${i+1}/${sections.length}: ${s.label}`;
+
+      // Expand parent collapse if needed
+      const navEl = document.getElementById(s.navId);
+      if(!navEl) continue;
+      const collapse = navEl.closest('.collapse');
+      if(collapse && !collapse.classList.contains('show')) {
+        bootstrap.Collapse.getOrCreateInstance(collapse).show();
+        await pause(300);
+      }
+
+      // Navigate to this tab
+      navEl.click();
+      await pause(500);
+
+      // Trigger calculation if this section needs it and hasn't been done
+      if(s.calcCheck && !s.calcCheck()) {
+        btn.innerHTML = `🔄 ${i+1}/${sections.length}: calculando ${s.label}…`;
+        document.getElementById(s.calcBtnId)?.click();
+        await pause(2800);
+      }
+
+      // Extra wait for Plotly/D3 renders
+      await pause(400);
+
+      const pane = document.getElementById(s.paneId);
+      if(!pane) continue;
+
+      const canvas = await html2canvas(pane, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      if(!firstPage) pdf.addPage();
+      firstPage = false;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const ratio   = contentW / canvas.width;
+      const imgH    = canvas.height * ratio;
+      const pageH   = A4H - 2 * MARGIN;
+
+      if(imgH <= pageH) {
+        pdf.addImage(imgData, 'JPEG', MARGIN, MARGIN, contentW, imgH);
+      } else {
+        // Slice tall content across multiple pages
+        const sliceRows = Math.ceil(imgH / pageH);
+        for(let p = 0; p < sliceRows; p++) {
+          if(p > 0) pdf.addPage();
+          const srcY  = Math.round(p * pageH / ratio);
+          const srcH  = Math.min(Math.round(pageH / ratio), canvas.height - srcY);
+          const slice = document.createElement('canvas');
+          slice.width  = canvas.width;
+          slice.height = srcH;
+          slice.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+          pdf.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG', MARGIN, MARGIN, contentW, srcH * ratio);
+        }
+      }
+    }
+
+    btn.innerHTML = '📄 Guardando…';
+    pdf.save('Informe_Completo_PETI_2025-2028.pdf');
+  } catch(err) {
+    console.error('Error generando PDF:', err);
+    alert('Error al generar el PDF: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
+  }
+}
+
 // call it once now (panes are present in DOM)
 attachSectionDownloadButtons();
+document.getElementById('downloadAllBtn').addEventListener('click', downloadAllModulesPDF);
 
 // ============================================================
 // MODULE 6: LÍNEAS DE ESPERA (Queueing Theory)
@@ -896,3 +1006,427 @@ document.getElementById('nav-game').addEventListener('shown.bs.tab', () => {
 });
 
 buildGameMatrix();
+
+// ============================================================
+// MÓDULO PERT/CPM
+// ============================================================
+
+const PERT_PRESETS = {
+  logistico: [
+    {id:'A', desc:'Planificación de rutas y red de transporte',    preds:[],         dur:3},
+    {id:'B', desc:'Contratación de proveedores de carga',          preds:['A'],      dur:4},
+    {id:'C', desc:'Adecuación física del centro de despacho',      preds:['A'],      dur:6},
+    {id:'D', desc:'Mantenimiento y revisión de flota vehicular',   preds:['B'],      dur:6},
+    {id:'E', desc:'Capacitación de conductores',                   preds:['B'],      dur:4},
+    {id:'F', desc:'Instalación del software TMS',                  preds:['C'],      dur:4},
+    {id:'G', desc:'Despacho del primer lote de prueba',            preds:['D'],      dur:6},
+    {id:'H', desc:'Auditoría final de entrega',                    preds:['E','F'],  dur:8},
+  ],
+  inventarios: [
+    {id:'I', desc:'Análisis de requerimientos',          preds:[],         dur:4},
+    {id:'J', desc:'Selección de proveedor RFID',         preds:['I'],      dur:3},
+    {id:'K', desc:'Adecuación del almacén',              preds:['I'],      dur:5},
+    {id:'L', desc:'Instalación de lectores y antenas',   preds:['J','K'],  dur:4},
+    {id:'M', desc:'Configuración del software',          preds:['L'],      dur:3},
+    {id:'N', desc:'Pruebas piloto',                      preds:['M'],      dur:2},
+    {id:'O', desc:'Capacitación del personal',           preds:['M'],      dur:3},
+    {id:'P', desc:'Integración con TMS',                 preds:['N','O'],  dur:2},
+  ],
+};
+
+let _currentPertPreset = 'logistico';
+
+let lastPertCpmData = null;
+
+function buildPertRow(act) {
+  const predsStr = (act.preds || []).join(', ');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="form-control form-control-sm pert-id" value="${escapeHtml(act.id)}" style="width:55px"></td>
+    <td><input class="form-control form-control-sm pert-desc" value="${escapeHtml(act.desc)}"></td>
+    <td><input class="form-control form-control-sm pert-preds" value="${escapeHtml(predsStr)}" placeholder="A, B"></td>
+    <td><input type="number" class="form-control form-control-sm pert-dur" value="${act.dur}" min="1" style="width:75px"></td>
+    <td><button class="btn btn-sm btn-outline-danger" onclick="removePertRow(this)">✕</button></td>`;
+  return tr;
+}
+
+function loadPertPreset(name) {
+  _currentPertPreset = name;
+  const tbody = document.getElementById('pertActivitiesBody');
+  tbody.innerHTML = '';
+  (PERT_PRESETS[name] || []).forEach(a => tbody.appendChild(buildPertRow(a)));
+  lastPertCpmData = null;
+  const status = document.getElementById('pertComputeStatus');
+  if (status) status.innerHTML = '';
+  ['pertForwardArea','pertBackwardArea','pertHolgurasArea','pertRedArea'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<p class="text-muted small">Haz clic en <strong>Calcular</strong> en el tab Actividades primero.</p>';
+  });
+  const chart = document.getElementById('pertNetworkChart');
+  if (chart) { chart.innerHTML = ''; }
+}
+
+function addPertRow() {
+  const tbody = document.getElementById('pertActivitiesBody');
+  tbody.appendChild(buildPertRow({id:'', desc:'', preds:[], dur:1}));
+}
+
+function removePertRow(btn) {
+  btn.closest('tr').remove();
+}
+
+function clearPertActivities() {
+  document.getElementById('pertActivitiesBody').innerHTML = '';
+  ['pertForwardArea','pertBackwardArea','pertHolgurasArea','pertRedArea'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<p class="text-muted small">Haz clic en <strong>Calcular</strong> en el tab Actividades primero.</p>';
+  });
+  const chart = document.getElementById('pertNetworkChart');
+  if (chart) Plotly.purge('pertNetworkChart');
+  document.getElementById('pertComputeStatus').innerHTML = '';
+  lastPertCpmData = null;
+  _currentPertPreset = null;
+}
+
+function getPertTableData() {
+  const rows = document.querySelectorAll('#pertActivitiesBody tr');
+  return Array.from(rows).map(tr => ({
+    id:           tr.querySelector('.pert-id').value.trim(),
+    desc:         tr.querySelector('.pert-desc').value.trim(),
+    predecessors: tr.querySelector('.pert-preds').value.split(',').map(s=>s.trim()).filter(s=>s),
+    duration:     parseInt(tr.querySelector('.pert-dur').value) || 1,
+  })).filter(a => a.id);
+}
+
+async function computePertCpm() {
+  const activities = getPertTableData();
+  if (!activities.length) return;
+  const status = document.getElementById('pertComputeStatus');
+  if (status) status.innerHTML = '<span class="text-muted small">Calculando…</span>';
+  try {
+    const res  = await fetch('/compute_pert_cpm', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({activities}),
+    });
+    const data = await res.json();
+    lastPertCpmData = data;
+    renderPertForward(data);
+    renderPertBackward(data);
+    renderPertHolguras(data);
+    renderPertNetwork(data);
+    if (status) status.innerHTML = '<span class="text-success small">✓ Cálculo completado. Revisa los tabs de resultados.</span>';
+  } catch(e) {
+    if (status) status.innerHTML = `<div class="alert alert-danger py-1 small">Error: ${escapeHtml(String(e))}</div>`;
+  }
+}
+
+// ---- Render: Forward Pass ----
+function renderPertForward(data) {
+  const area = document.getElementById('pertForwardArea');
+  if (!area) return;
+  const acts = data.activities || [];
+  if (!acts.length) { area.innerHTML = '<div class="alert alert-warning">Sin actividades.</div>'; return; }
+  const criticalSet = new Set(data.critical_path || []);
+  let html = `<div class="table-responsive">
+    <table class="table table-bordered table-sm">
+      <thead class="table-dark">
+        <tr><th>Actividad</th><th>Descripción</th><th>Predecesores</th><th>Duración (días)</th><th>IP</th><th>TP = IP + Dur</th></tr>
+      </thead><tbody>`;
+  acts.forEach(a => {
+    const cls = criticalSet.has(a.id) ? ' class="table-danger fw-bold"' : '';
+    html += `<tr${cls}>
+      <td><strong>${escapeHtml(a.id)}</strong></td>
+      <td>${escapeHtml(a.desc)}</td>
+      <td>${escapeHtml((a.predecessors||[]).join(', ') || '—')}</td>
+      <td>${a.duration}</td><td>${a.IP}</td><td>${a.TP}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  html += `<div class="alert alert-secondary mt-2 small"><strong>Duración mínima del proyecto:</strong> ${data.project_duration} días</div>`;
+  area.innerHTML = html;
+}
+
+// ---- Render: Backward Pass ----
+function renderPertBackward(data) {
+  const area = document.getElementById('pertBackwardArea');
+  if (!area) return;
+  const acts = data.activities || [];
+  if (!acts.length) { area.innerHTML = '<div class="alert alert-warning">Sin actividades.</div>'; return; }
+  const criticalSet = new Set(data.critical_path || []);
+  let html = `<div class="table-responsive">
+    <table class="table table-bordered table-sm">
+      <thead class="table-dark">
+        <tr><th>Actividad</th><th>Duración (días)</th><th>TL (inicial)</th><th>IL = TL − Dur</th></tr>
+      </thead><tbody>`;
+  [...acts].reverse().forEach(a => {
+    const cls = criticalSet.has(a.id) ? ' class="table-danger fw-bold"' : '';
+    html += `<tr${cls}><td><strong>${escapeHtml(a.id)}</strong></td><td>${a.duration}</td><td>${a.TL}</td><td>${a.IL}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  area.innerHTML = html;
+}
+
+// ---- Render: Holguras ----
+function renderPertHolguras(data) {
+  const area = document.getElementById('pertHolgurasArea');
+  if (!area) return;
+  const acts = data.activities || [];
+  if (!acts.length) { area.innerHTML = '<div class="alert alert-warning">Sin actividades.</div>'; return; }
+  const badge = c => c ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>';
+  let html = `<div class="table-responsive">
+    <table class="table table-bordered table-sm">
+      <thead class="table-dark">
+        <tr><th>Actividad</th><th>IP</th><th>IL</th><th>Holgura = IL − IP</th><th>¿Crítica?</th></tr>
+      </thead><tbody>`;
+  acts.forEach(a => {
+    const cls = a.critica ? ' class="table-danger fw-bold"' : '';
+    html += `<tr${cls}><td><strong>${escapeHtml(a.id)}</strong></td><td>${a.IP}</td><td>${a.IL}</td><td>${a.holgura}</td><td>${badge(a.critica)}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  const cpStr = (data.critical_path || []).join(' → ');
+  html += `<div class="alert alert-danger mt-3">
+    <strong>Ruta Crítica:</strong> ${escapeHtml(cpStr)}<br>
+    <strong>Duración total del proyecto:</strong> ${data.project_duration} días
+  </div>`;
+  if (data.conclusion) {
+    html += `<div class="alert alert-info"><strong>Conclusión:</strong> ${escapeHtml(data.conclusion)}</div>`;
+  }
+  area.innerHTML = html;
+}
+
+// ---- Render: Red PERT/CPM con Plotly ----
+function renderPertNetwork(data) {
+  const acts = data.activities || [];
+  if (!acts.length) return;
+
+  const criticalSet = new Set(data.critical_path || []);
+
+  // ── Topological levels ──────────────────────────────────────
+  const level = {};
+  acts.forEach(a => { if (!(a.predecessors||[]).length) level[a.id] = 0; });
+  let changed = true;
+  while (changed) {
+    changed = false;
+    acts.forEach(a => {
+      if (level[a.id] !== undefined) return;
+      const p = a.predecessors || [];
+      if (p.every(x => level[x] !== undefined)) {
+        level[a.id] = Math.max(...p.map(x => level[x])) + 1;
+        changed = true;
+      }
+    });
+  }
+
+  // ── Positions ───────────────────────────────────────────────
+  const byLevel = {};
+  acts.forEach(a => {
+    const lv = level[a.id] ?? 0;
+    (byLevel[lv] = byLevel[lv] || []).push(a.id);
+  });
+
+  const xGap = 230, yGap = 140;
+  const NW = 110, NH = 56;          // node full width / height
+  const hw = NW / 2, hh = NH / 2;   // half-width, half-height
+
+  const pos = {};
+  Object.keys(byLevel).sort((a,b)=>+a-+b).forEach(lv => {
+    const nodes = byLevel[lv];
+    nodes.forEach((id, i) => {
+      pos[id] = {
+        x: +lv * xGap,
+        y: (i - (nodes.length - 1) / 2) * yGap,
+      };
+    });
+  });
+
+  // ── Shapes (node rectangles + internal dividers) ─────────────
+  const shapes = [];
+  const ROW_H = 18;   // height of top/bottom data rows inside the node
+
+  acts.forEach(a => {
+    if (!pos[a.id]) return;
+    const { x: cx, y: cy } = pos[a.id];
+    const isCrit = criticalSet.has(a.id);
+
+    // Main rectangle
+    shapes.push({
+      type: 'rect',
+      x0: cx - hw, x1: cx + hw,
+      y0: cy - hh, y1: cy + hh,
+      fillcolor: isCrit ? '#dc3545' : '#0d6efd',
+      line: { color: isCrit ? '#9b1c2e' : '#084298', width: 2.5 },
+      layer: 'below',
+    });
+
+    // Horizontal divider — top row
+    const topDiv = cy + hh - ROW_H;
+    shapes.push({ type:'line', x0:cx-hw, x1:cx+hw, y0:topDiv, y1:topDiv,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+
+    // Horizontal divider — bottom row
+    const botDiv = cy - hh + ROW_H;
+    shapes.push({ type:'line', x0:cx-hw, x1:cx+hw, y0:botDiv, y1:botDiv,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+
+    // Vertical dividers (top row: IP | ID | TP)
+    const vx1 = cx - hw + 36, vx2 = cx + hw - 36;
+    shapes.push({ type:'line', x0:vx1, x1:vx1, y0:topDiv, y1:cy+hh,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+    shapes.push({ type:'line', x0:vx2, x1:vx2, y0:topDiv, y1:cy+hh,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+
+    // Vertical dividers (bottom row: IL | H | TL)
+    shapes.push({ type:'line', x0:vx1, x1:vx1, y0:cy-hh, y1:botDiv,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+    shapes.push({ type:'line', x0:vx2, x1:vx2, y0:cy-hh, y1:botDiv,
+      line:{ color:'rgba(255,255,255,0.35)', width:1 } });
+  });
+
+  // ── Annotations ──────────────────────────────────────────────
+  const annotations = [];
+
+  // Node text labels
+  acts.forEach(a => {
+    if (!pos[a.id]) return;
+    const { x: cx, y: cy } = pos[a.id];
+    const topDiv  = cy + hh - ROW_H;
+    const botDiv  = cy - hh + ROW_H;
+    const topRowY = (topDiv + cy + hh) / 2;
+    const midRowY = (topDiv + botDiv) / 2;
+    const botRowY = (botDiv + cy - hh) / 2;
+    const lx = cx - hw + 18, rx = cx + hw - 18;
+    const white = '#fff', faint = 'rgba(255,255,255,0.82)';
+
+    // Top row: IP | ID | TP
+    annotations.push({ x:lx, y:topRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>${a.IP}</b>`, font:{color:faint,size:10}, xanchor:'center', yanchor:'middle' });
+    annotations.push({ x:cx, y:topRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>${a.id}</b>`, font:{color:white,size:15,family:'Arial Black'}, xanchor:'center', yanchor:'middle' });
+    annotations.push({ x:rx, y:topRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>${a.TP}</b>`, font:{color:faint,size:10}, xanchor:'center', yanchor:'middle' });
+
+    // Mid row: description (truncated)
+    const desc = a.desc.length > 20 ? a.desc.slice(0,18) + '…' : a.desc;
+    annotations.push({ x:cx, y:midRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<i>${desc}</i>`, font:{color:'rgba(255,255,255,0.88)',size:8}, xanchor:'center', yanchor:'middle' });
+
+    // Bottom row: IL | H | TL
+    annotations.push({ x:lx, y:botRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>${a.IL}</b>`, font:{color:faint,size:10}, xanchor:'center', yanchor:'middle' });
+    annotations.push({ x:cx, y:botRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>H=${a.holgura}</b>`, font:{color:white,size:9}, xanchor:'center', yanchor:'middle' });
+    annotations.push({ x:rx, y:botRowY, xref:'x', yref:'y', showarrow:false,
+      text:`<b>${a.TL}</b>`, font:{color:faint,size:10}, xanchor:'center', yanchor:'middle' });
+
+    // Tiny column headers outside the node
+    annotations.push({ x:lx, y:cy+hh+4, xref:'x', yref:'y', showarrow:false,
+      text:'IP', font:{color:'#888',size:7}, xanchor:'center', yanchor:'bottom' });
+    annotations.push({ x:rx, y:cy+hh+4, xref:'x', yref:'y', showarrow:false,
+      text:'TP', font:{color:'#888',size:7}, xanchor:'center', yanchor:'bottom' });
+    annotations.push({ x:lx, y:cy-hh-3, xref:'x', yref:'y', showarrow:false,
+      text:'IL', font:{color:'#888',size:7}, xanchor:'center', yanchor:'top' });
+    annotations.push({ x:rx, y:cy-hh-3, xref:'x', yref:'y', showarrow:false,
+      text:'TL', font:{color:'#888',size:7}, xanchor:'center', yanchor:'top' });
+  });
+
+  // Edge arrows + duration labels
+  acts.forEach(a => {
+    (a.predecessors || []).forEach(pid => {
+      if (!pos[pid] || !pos[a.id]) return;
+      const isCrit = criticalSet.has(pid) && criticalSet.has(a.id);
+      const src = pos[pid], tgt = pos[a.id];
+
+      // Start from right edge of source, end at left edge of target
+      const x0 = src.x + hw, y0 = src.y;
+      const x1 = tgt.x - hw, y1 = tgt.y;
+
+      annotations.push({
+        ax:x0, ay:y0, x:x1, y:y1,
+        xref:'x', yref:'y', axref:'x', ayref:'y',
+        showarrow:true, arrowhead:2,
+        arrowsize:1.2,
+        arrowwidth: isCrit ? 3 : 1.8,
+        arrowcolor: isCrit ? '#dc3545' : '#868e96',
+      });
+
+      // Duration badge on midpoint
+      annotations.push({
+        x:(x0+x1)/2, y:(y0+y1)/2 + 5,
+        xref:'x', yref:'y', showarrow:false,
+        text: `${a.duration}d`,
+        font:{ size:9, color: isCrit ? '#c82333' : '#555' },
+        bgcolor:'rgba(255,255,255,0.88)',
+        bordercolor: isCrit ? '#dc3545' : '#ced4da',
+        borderwidth:1, borderpad:2,
+        xanchor:'center', yanchor:'bottom',
+      });
+    });
+  });
+
+  // ── Invisible hover trace ────────────────────────────────────
+  const hx=[], hy=[], ht=[];
+  acts.forEach(a => {
+    if (!pos[a.id]) return;
+    hx.push(pos[a.id].x);
+    hy.push(pos[a.id].y);
+    ht.push(`<b>${a.id} — ${a.desc}</b><br>Duración: ${a.duration} días<br><b>IP:</b> ${a.IP}  <b>TP:</b> ${a.TP}<br><b>IL:</b> ${a.IL}  <b>TL:</b> ${a.TL}<br><b>Holgura:</b> ${a.holgura} día(s)${a.holgura===0?' ⚠ Crítica':''}`);
+  });
+
+  const hoverTrace = {
+    x:hx, y:hy, mode:'markers', type:'scatter',
+    marker:{ size:NW*0.9, opacity:0, color:'transparent' },
+    customdata:ht,
+    hovertemplate:'%{customdata}<extra></extra>',
+    showlegend:false,
+  };
+
+  // ── Layout bounds ────────────────────────────────────────────
+  const allX = Object.values(pos).map(p=>p.x);
+  const allY = Object.values(pos).map(p=>p.y);
+  const pad = 30;
+  const xRange = [Math.min(...allX)-hw-pad, Math.max(...allX)+hw+pad];
+  const yRange = [Math.min(...allY)-hh-40,   Math.max(...allY)+hh+40];
+
+  const presetLabels = {
+    logistico:   'Proyecto Logístico — PETI 2025-2028',
+    inventarios: 'Automatización de Inventarios RFID',
+  };
+  const title = presetLabels[_currentPertPreset] || 'Red PERT/CPM';
+
+  const layout = {
+    title:{ text:`Red PERT/CPM — ${title}`, font:{size:14,color:'#212529'}, x:0.5 },
+    xaxis:{ visible:false, zeroline:false, range:xRange },
+    yaxis:{ visible:false, zeroline:false, range:yRange },
+    paper_bgcolor:'#fff',
+    plot_bgcolor:'#f8fafc',
+    margin:{ t:55, b:15, l:15, r:15 },
+    height: Math.max(480, (Math.max(...Object.values(pos).map(p=>Math.abs(p.y)))*2) + 180),
+    shapes,
+    annotations,
+    hovermode:'closest',
+  };
+
+  const chartEl = document.getElementById('pertNetworkChart');
+  if (!chartEl) return;
+  document.getElementById('pertRedArea').innerHTML = '';
+  Plotly.newPlot('pertNetworkChart', [hoverTrace], layout, {responsive:true, displayModeBar:false});
+}
+
+// ---- Event listeners (5 tabs) ----
+document.getElementById('pertCpmComputeBtn').addEventListener('click', computePertCpm);
+document.getElementById('pertClearBtn').addEventListener('click', clearPertActivities);
+
+document.getElementById('nav-pert-actividades').addEventListener('shown.bs.tab', () => { /* input tab, no render */ });
+document.getElementById('nav-pert-forward').addEventListener('shown.bs.tab', () => {
+  if (lastPertCpmData) renderPertForward(lastPertCpmData);
+});
+document.getElementById('nav-pert-backward').addEventListener('shown.bs.tab', () => {
+  if (lastPertCpmData) renderPertBackward(lastPertCpmData);
+});
+document.getElementById('nav-pert-holguras').addEventListener('shown.bs.tab', () => {
+  if (lastPertCpmData) renderPertHolguras(lastPertCpmData);
+});
+document.getElementById('nav-pert-red').addEventListener('shown.bs.tab', () => {
+  if (lastPertCpmData) renderPertNetwork(lastPertCpmData);
+});
+
+loadPertPreset('logistico');

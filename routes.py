@@ -3,6 +3,7 @@ from compute import compute_all, build_tree_json
 from tree_render import render_tree_png
 from queueing import compute_queueing
 from game_theory import compute_game_theory
+from pert_cpm import compute_pert_cpm
 
 bp = Blueprint('main', __name__)
 
@@ -52,3 +53,9 @@ def compute_game_theory_route():
         'row_labels': data.get('row_labels', ['E1', 'E2', 'E3', 'E4']),
         'col_labels': data.get('col_labels', ['U1', 'U2', 'U3', 'U4']),
     }))
+
+
+@bp.route('/compute_pert_cpm', methods=['POST'])
+def compute_pert_cpm_route():
+    data = request.get_json(force=True) or {}
+    return jsonify(compute_pert_cpm(data))
